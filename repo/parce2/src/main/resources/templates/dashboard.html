@@ -4,6 +4,9 @@
 <main>
   <h1>Panel de consultas médicas</h1>
   <p>Usa Swagger para consultar los servicios: <a href="/swagger-ui.html">Swagger UI</a></p>
-  <form method="post" action="/logout"><button type="submit">Cerrar sesión</button></form>
+  <form method="post" action="/logout">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <button type="submit">Cerrar sesión</button>
+  </form>
 </main>
 </body></html>

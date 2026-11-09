@@ -46,4 +46,12 @@ class Parce2ApplicationTests {
     void patientCannotReadDoctors() throws Exception {
         mvc.perform(get("/api/medicos")).andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithMockUser(username = "paciente", roles = "PACIENTE")
+    void logoutReturnsToLogin() throws Exception {
+        mvc.perform(post("/logout").with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/login?logout"));
+    }
 }
