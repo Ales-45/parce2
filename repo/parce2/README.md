@@ -15,11 +15,9 @@ Rutas:
 Servicios:
 
 - `GET/POST/PUT/DELETE /api/medicos`: solo ADMINISTRADOR.
-- `GET /api/consultas`: ADMINISTRADOR ve todas; MÉDICO ve solo las asignadas; PACIENTE ve solo las propias.
+- `GET /api/consultas`: ADMINISTRADOR ve todas; MÉDICO ve solo las asignadas; PACIENTE solo las propias.
 - `POST /api/consultas`: solo ADMINISTRADOR; asigna médico y paciente.
-- `PATCH /api/consultas/{id}/horario`: solo PACIENTE y únicamente para su propia cita.
-
-Cada endpoint documentado incluye respuestas `401` y `403`, además de su respuesta exitosa.
+- `PATCH /api/consultas/{id}/horario`: solo PACIENTE y para su propia cita.
 
 Ejecución:
 
