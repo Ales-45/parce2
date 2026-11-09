@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Acceso - Consultas médicas</title></head>
+<body>
+<main>
+  <h1>Consultas médicas</h1>
+  <form method="post" action="/login">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <label>Usuario <input name="username" required></label>
+    <label>Contraseña <input type="password" name="password" required></label>
+    <button type="submit">Ingresar</button>
+  </form>
+  <p th:if="${param.error}">Credenciales inválidas.</p>
+  <p th:if="${param.logout}">Sesión cerrada.</p>
+</main>
+</body>
+</html>
