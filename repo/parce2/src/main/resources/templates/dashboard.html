@@ -1,12 +1,86 @@
 <!doctype html>
-<html lang="es"><head><meta charset="UTF-8"><title>Panel</title></head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Consultas médicas</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;background:#f4f6f8;color:#18212b}
+section{background:white;padding:1rem 1.25rem;margin:1rem 0;border-radius:8px;box-shadow:0 1px 5px #ccd}
+form{display:grid;gap:.5rem;margin:.75rem 0} input,button{padding:.5rem} button{cursor:pointer}
+table{width:100%;border-collapse:collapse} th,td{padding:.5rem;border-bottom:1px solid #ddd;text-align:left}
+.success{color:#176b36}.error{color:#a12727}.inline{display:inline}
+</style></head>
 <body>
-<main>
-  <h1>Panel de consultas médicas</h1>
-  <p>Usa Swagger para consultar los servicios: <a href="/swagger-ui.html">Swagger UI</a></p>
-  <form method="post" action="/logout">
+<header>
+  <h1>Gestión de consultas médicas</h1>
+  <p>Usuario: <strong th:text="${username}"></strong> | Rol: <strong th:text="${role}"></strong></p>
+  <form class="inline" method="post" action="/logout">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
     <button type="submit">Cerrar sesión</button>
   </form>
-</main>
+</header>
+<p class="success" th:if="${message}" th:text="${message}"></p>
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<section th:if="${role == 'ADMINISTRADOR'}">
+  <h2>Registrar médico</h2>
+  <form method="post" action="/dashboard/medicos">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <input name="name" maxlength="80" placeholder="Nombre del médico" required>
+    <input name="specialty" maxlength="100" placeholder="Especialidad" required>
+    <input name="officeNumber" type="number" min="1" placeholder="Consultorio" required>
+    <button type="submit">Crear médico</button>
+  </form>
+  <h2>Médicos registrados</h2>
+  <table><tr><th>Nombre</th><th>Especialidad</th><th>Consultorio</th><th>Acciones</th></tr>
+    <tr th:each="doctor : ${doctors}">
+      <form method="post" th:action="@{/dashboard/medicos/{id}/editar(id=${doctor.id})}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <td><input name="name" th:value="${doctor.name}" required></td>
+        <td><input name="specialty" th:value="${doctor.specialty}" required></td>
+        <td><input name="officeNumber" type="number" min="1" th:value="${doctor.officeNumber}" required></td>
+        <td><button type="submit">Guardar</button></form>
+          <form class="inline" method="post" th:action="@{/dashboard/medicos/{id}/eliminar(id=${doctor.id})}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">Eliminar</button>
+          </form>
+        </td>
+    </tr>
+  </table>
+  <h2>Asignar consulta</h2>
+  <form method="post" action="/dashboard/consultas">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <input name="patientName" maxlength="40" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ0-9 .'-]+" placeholder="Nombre del paciente" required>
+    <input name="reason" maxlength="100" placeholder="Motivo de la consulta" required>
+    <input name="officeNumber" type="number" min="1" placeholder="Número de consultorio" required>
+    <label>Inicio <input name="startTime" type="datetime-local" required></label>
+    <label>Fin <input name="endTime" type="datetime-local" required></label>
+    <select name="doctorId" required><option value="">Seleccione médico</option>
+      <option th:each="doctor : ${doctors}" th:value="${doctor.id}" th:text="${doctor.name + ' - consultorio ' + doctor.officeNumber}"></option>
+    </select>
+    <select name="patientUsername" required><option value="">Seleccione paciente</option>
+      <option th:each="patient : ${patients}" th:value="${patient.username}" th:text="${patient.username}"></option>
+    </select>
+    <button type="submit">Asignar consulta</button>
+  </form>
+</section>
+
+<section>
+  <h2 th:if="${role == 'ADMINISTRADOR'}">Todas las consultas</h2>
+  <h2 th:if="${role == 'MEDICO'}">Mis consultas asignadas</h2>
+  <h2 th:if="${role == 'PACIENTE'}">Mis citas</h2>
+  <table><tr><th>Paciente</th><th>Motivo</th><th>Consultorio</th><th>Médico</th><th>Inicio</th><th>Fin</th><th th:if="${role == 'PACIENTE'}">Acción</th></tr>
+    <tr th:each="appointment : ${appointments}">
+      <td th:text="${appointment.patientName}"></td><td th:text="${appointment.reason}"></td>
+      <td th:text="${appointment.officeNumber}"></td><td th:text="${appointment.doctor.name}"></td>
+      <td th:text="${appointment.startTime}"></td><td th:text="${appointment.endTime}"></td>
+      <td th:if="${role == 'PACIENTE'}">
+        <form method="post" th:action="@{/dashboard/consultas/{id}/horario(id=${appointment.id})}">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <input name="startTime" type="datetime-local" th:value="${appointment.startTime}" required>
+          <input name="endTime" type="datetime-local" th:value="${appointment.endTime}" required>
+          <button type="submit">Actualizar horario</button>
+        </form>
+      </td>
+    </tr>
+  </table>
+</section>
 </body></html>
